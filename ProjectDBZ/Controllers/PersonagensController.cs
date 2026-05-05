@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProjectDBZ.Data;
+using ProjectDBZ.Models;
 
 namespace ProjectDBZ.Controllers
 {
@@ -46,8 +47,21 @@ namespace ProjectDBZ.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPersonagens()
         {
-            var personagens = await _appDbContext.DBZ.ToListAsync();
+            IEnumerable<Personagem> personagens = await _appDbContext.DBZ.ToListAsync();
             return Ok(personagens);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdatePersonagem([FromBody] Models.Personagem personagem, int id)
+        {
+            var oldPersonagem = await _appDbContext.DBZ.FindAsync(id);
+
+            if (oldPersonagem is null) return NotFound();
+            _appDbContext.Entry(oldPersonagem).CurrentValues.SetValues(personagem);
+
+            await _appDbContext.SaveChangesAsync();
+
+            return Ok(personagem);
         }
     }
 }
