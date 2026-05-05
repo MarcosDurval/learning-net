@@ -23,12 +23,6 @@ namespace ProjectDBZ.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPersonagem([FromBody] Models.Personagem personagem)
         {
-            // _appDbContext.DBZ.Add(personagem);
-            // if (!ModelState.IsValid)
-            // {
-            //     return BadRequest(ModelState);
-            // }
-            Console.WriteLine(@"${personagem}");
             // Adiciona o personagem ao contexto e salva as mudanças no banco de dados
             _appDbContext.DBZ.Add(personagem);
             await _appDbContext.SaveChangesAsync();
@@ -52,7 +46,7 @@ namespace ProjectDBZ.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllPersonagens()
         {
-            var personagens = await _appDbContext.DBZ.FindAsync();
+            var personagens = await _appDbContext.DBZ.ToListAsync();
             return Ok(personagens);
         }
     }
