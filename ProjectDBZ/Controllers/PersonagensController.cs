@@ -24,6 +24,11 @@ namespace ProjectDBZ.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPersonagem([FromBody] Models.Personagem personagem)
         {
+            if (personagem.Id is null || personagem.Id == Guid.Empty)
+            {
+                personagem.Id = Guid.NewGuid();
+            }
+
             // Adiciona o personagem ao contexto e salva as mudanças no banco de dados
             _appDbContext.DBZ.Add(personagem);
             await _appDbContext.SaveChangesAsync();
@@ -33,7 +38,7 @@ namespace ProjectDBZ.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetPersonagemById(int id)
+        public async Task<IActionResult> GetPersonagemById(Guid id)
         {
             var personagem = await _appDbContext.DBZ.FindAsync(id);
             if (personagem is null)
@@ -52,8 +57,13 @@ namespace ProjectDBZ.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdatePersonagem([FromBody] Models.Personagem personagem, int id)
+        public async Task<IActionResult> UpdatePersonagem([FromBody] Models.Personagem personagem, Guid id)
         {
+            if (personagem.Id is not null && !Equals(personagem.Id, id))
+            {
+                return BadRequest("Route id does not match body id.");
+            }
+
             var oldPersonagem = await _appDbContext.DBZ.FindAsync(id);
 
             if (oldPersonagem is null) return NotFound();
@@ -62,6 +72,21 @@ namespace ProjectDBZ.Controllers
             await _appDbContext.SaveChangesAsync();
 
             return Ok(personagem);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePersonagem(Guid id)
+        {
+            var personagem = await _appDbContext.DBZ.FindAsync(id);
+            if (personagem is null)
+            {
+                return NoContent();
+            }
+
+            _appDbContext.DBZ.Remove(personagem);
+            await _appDbContext.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
